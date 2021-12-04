@@ -31,13 +31,17 @@ fn part1() {
     //
     let mut position = 0;
     let mut depth = 0;
+    let mut aim = 0;
 
     for d in data {
         match d {
-            Direction::Forward(x) => position += x,
+            Direction::Forward(x) => {
+                position += x;
+                depth += aim * x;
+            },
             Direction::Backward(x) => position -= x,
-            Direction::Up(x) => depth -= x,
-            Direction::Down(x) => depth += x,
+            Direction::Up(x) => aim -= x,
+            Direction::Down(x) => aim += x,
         }
     }
 
