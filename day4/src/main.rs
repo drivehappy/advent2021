@@ -13,6 +13,7 @@ fn read_lines() -> Vec<String> {
     data
 }
 
+#[derive(Debug, Copy, Clone)]
 struct Board {
     value: [[i8; 5]; 5],
     selected: [[bool; 5]; 5],
@@ -70,7 +71,7 @@ fn board_score(b: &Board) -> i32 {
     score
 }
 
-fn part1() {
+fn parse_rand_boards() -> (Vec<i8>, Vec<Board>) {
     let data = read_lines();
 
     // Parse and build random numbers
@@ -94,6 +95,13 @@ fn part1() {
         boards.push(b);
     }
 
+    (random_numbers, boards)
+}
+
+// Find first board with bingo
+fn part1() {
+    let (random_numbers, mut boards) = parse_rand_boards();
+
     // Evaluate boards
     'outer: for x in random_numbers {
         // Update board state
@@ -112,7 +120,38 @@ fn part1() {
     }
 }
 
+// Find last board with bingo
+fn part2() {
+    let (random_numbers, mut boards) = parse_rand_boards();
+    let mut last_bingo_board: Option<Board> = None;
+    let mut last_rand_num = 0;
+
+    // Evaluate boards
+    'outer: for x in random_numbers {
+        // Update board state
+        for b in &mut boards {
+            b.select(x);
+
+            // Check if bingo
+            if b.is_bingo() {
+                last_bingo_board = Some(*b);
+                last_rand_num = x;
+            }
+        }
+
+        // Remove any board that is bingo from our remaining list
+        boards = boards.into_iter().filter(|b| !b.is_bingo()).collect();
+    }
+
+    //
+    println!("Last rand: {}", last_rand_num);
+    println!("Board: {:?}", last_bingo_board.unwrap());
+    let bs = board_score(&last_bingo_board.unwrap()) * (last_rand_num as i32);
+    println!("Bingo found, score: {}", bs);
+}
+
 fn main() {
-    part1();
+    //part1();
+    part2();
 }
 
