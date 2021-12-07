@@ -13,7 +13,7 @@ fn read_lines() -> Vec<String> {
     data
 }
 
-
+#[derive(Debug)]
 struct Coord {
     x: i32,
     y: i32,
@@ -41,7 +41,16 @@ fn parse_data() -> Vec<CoordPair> {
 }
 
 
-type Grid = [[i8; 1000]; 1000];
+const DIM: usize = 1000;
+type Grid = [[i8; DIM]; DIM];
+
+fn generate_steps(a: i32, b: i32) -> Vec<i32> {
+    if a < b {
+        (a..=b).collect()
+    } else {
+        (b..=a).rev().collect()
+    }
+}
 
 fn is_vertical(c: &CoordPair) -> bool {
     c.0.x == c.1.x
@@ -50,22 +59,31 @@ fn is_horizontal(c: &CoordPair) -> bool {
     c.0.y == c.1.y
 }
 
-fn update_grid(grid: &mut Grid, lines: &Vec<CoordPair>) {
-    use std::cmp::{min, max};
-
-    for l in lines {
-        if !is_vertical(l) && !is_horizontal(l) {
-            continue;
+fn print_grid(grid: &Grid) {
+    for x in 0..DIM {
+        for y in 0..DIM {
+            print!("{}", grid[x][y]);
         }
+        println!("");
+    }
+}
 
-        let x_min = min(l.0.x, l.1.x);
-        let x_max = max(l.0.x, l.1.x);
-        let y_min = min(l.0.y, l.1.y);
-        let y_max = max(l.0.y, l.1.y);
+fn update_grid(grid: &mut Grid, lines: &Vec<CoordPair>) {
+    for l in lines {
+        if is_vertical(l) || is_horizontal(l) {
+            for x in generate_steps(l.0.x, l.1.x) {
+                for y in generate_steps(l.0.y, l.1.y) {
+                    grid[x as usize][y as usize] += 1;
+                }
+            }
+        } else {
+            // Diagonal
+            let xs = generate_steps(l.0.x, l.1.x);
+            let ys = generate_steps(l.0.y, l.1.y);
 
-        for x in x_min..=x_max {
-            for y in y_min..=y_max {
-                grid[x as usize][y as usize] += 1;
+            let coords = xs.iter().zip(ys.iter());
+            for (x, y) in coords {
+                grid[*x as usize][*y as usize] += 1;
             }
         }
     }
@@ -73,20 +91,21 @@ fn update_grid(grid: &mut Grid, lines: &Vec<CoordPair>) {
 
 fn part1() {
     let data = parse_data();
-    let mut grid: Grid = [[0; 1000]; 1000];
+    let mut grid: Grid = [[0; DIM]; DIM];
 
     update_grid(&mut grid, &data);
 
     // Count
     let mut count = 0;
-    for x in 0..1000 {
-        for y in 0..1000 {
+    for x in 0..DIM {
+        for y in 0..DIM {
             if grid[x as usize][y as usize] > 1 {
                 count += 1;
             }
         }
     }
     println!("Count: {}", count);
+    //print_grid(&grid);
 }
 
 fn main() {
