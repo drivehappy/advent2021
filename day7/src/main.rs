@@ -24,6 +24,15 @@ fn calculate_optimal_fuel_cost(positions: &[i32]) -> (i32, i32) {
     let min = *(positions.into_iter().min().unwrap());
     let max = *(positions.into_iter().max().unwrap());
 
+    // Build a small lookup table for the Part2 fuel costs, assumes some max value from input
+    let mut fuel_cost_lookup: [i32; 2000] = [0; 2000];
+    let mut curr_cost: i32 = 0;
+    for i in 0 .. 2000 {
+        curr_cost += i;
+        fuel_cost_lookup[i as usize] = curr_cost;
+    }
+
+    //
     fn calc_fuel_cost(pos_diffs: &[i32]) -> i32 {
         pos_diffs.iter().sum()
     }
@@ -33,7 +42,11 @@ fn calculate_optimal_fuel_cost(positions: &[i32]) -> (i32, i32) {
     for i in min ..= max {
         let mut position_diffs: Vec<i32> = Vec::<i32>::with_capacity(positions.len());
         for p in positions {
-            position_diffs.push((p - i).abs());
+            let distance = (p - i).abs();
+
+            //let cost_part1 = distance;
+            let cost_part2 = fuel_cost_lookup[distance as usize];
+            position_diffs.push(cost_part2);
         }
 
         let f = calc_fuel_cost(&position_diffs);
@@ -46,14 +59,10 @@ fn calculate_optimal_fuel_cost(positions: &[i32]) -> (i32, i32) {
     (optimal, diff)
 }
 
-fn part1() {
+fn main() {
     let positions = parse_data();
 
     let (optimal, diff) = calculate_optimal_fuel_cost(&positions);
     println!("Optimal: {}, Diff: {}", optimal, diff);
-}
-
-fn main() {
-    part1();
 }
 
